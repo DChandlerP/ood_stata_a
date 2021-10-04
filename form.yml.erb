@@ -1,0 +1,64 @@
+# Batch Connect app configuration file
+#
+# @note Used to define the submitted cluster, title, description, and
+#   hard-coded/user-defined attributes that make up this Batch Connect app.
+---
+
+<%-
+  compute_groups = %x[groups | tr ' ' '\n' | grep compute-]
+-%>
+
+cluster: "compute1-lsf"
+
+# Define attribute values that aren't meant to be modified by the user within
+# the Dashboard form
+attributes:
+  mounts:
+    help: |
+      Paths for docker to mount in the format '/PATH1:/PATH1 /PATH2:/PATH2 etc'
+
+      Reference: [Access Storage Volumes](https://docs.ris.wustl.edu/doc/compute/recipes/ris-compute-storage-volumes.html)
+
+      Note: HOME is automounted
+  job_group:
+    help: |
+      The value passed to the LSF '-g' option
+
+      Reference: [Job Groups](https://docs.ris.wustl.edu/doc/compute/recipes/job-execution-examples.html#job-groups)
+    value: "/<%= ENV['USER'] %>/ood"
+  user_group:
+    help: |
+      The value passed to the LSF '-G' option
+      
+      Reference: [User Groups](https://docs.ris.wustl.edu/doc/compute/compute-quick-start.html#groups)
+    widget: select
+    options:
+      <% user_groups = compute_groups.split("\n") %>
+      <% for user_group in user_groups do %>
+        - ["<%= user_group -%>","<%= user_group -%>"]
+      <% end %>
+  bc_queue:
+    help: "The LSF queue to submit the job to"
+    value: "general-interactive"
+  bc_num_hours:
+    help: "Hours to keep the job running"
+  bc_num_slots:
+    max: 4
+    help: "Number of cores to reserve"
+  memory:
+    widget: "number_field"
+    max: 32
+    min: 1
+    step: 1
+    value: 2
+    label: "Memory (GB)"
+    help: "Batch Job's Requested Maximum Memory Allocation"
+
+form:
+  - mounts
+  - job_group
+  - user_group
+  - bc_queue
+  - memory
+  - bc_num_hours
+  - bc_num_slots

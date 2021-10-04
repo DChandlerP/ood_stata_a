@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Benchmark info
+echo "TIMING - Starting main script at: $(date)"
+
+# Create the truncated supervisord conf file as OOD already started vncserver and websockify
+svdfile=$PWD/supervisord.conf
+
+cat <<EOF > $svdfile
+[supervisord]
+nodaemon=true
+logfile=$PWD/supervisord.log
+pidfile=$PWD/supervisord.pid
+
+[include]
+files = /app/conf.d/fluxbox.conf /app/conf.d/xterm.conf /app/conf.d/xvfb.conf
+EOF
+
+
+# Set working directory to home directory
+cd "${HOME}"
+
+# Ensure that the user's configured login shell is used
+export SHELL="$(getent passwd $USER | cut -d: -f7)"
+
+#
+# Start
+#
+
+# Benchmark info
+echo "TIMING - Starting at: $(date)"
+
+# Launch
+set -x
+supervisord -c $svdfile

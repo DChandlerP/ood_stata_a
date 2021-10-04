@@ -1,0 +1,12 @@
+---
+name: Stata Desktop
+icon: ./icon.jpg
+category: Interactive Apps
+subcategory: Desktops
+role: batch_connect
+description: |
+  This app will launch Stata on one or more compute nodes. You
+  will have full access to the resources these nodes provide. This is analogous
+  to an interactive batch job. More information can be found in 
+  [noVNC Dockerimage](https://docs.ris.wustl.edu/doc/compute/recipes/tools/novnc-dockerimage.html)
+  docs.

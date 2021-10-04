@@ -1,0 +1,44 @@
+# Job submission configuration file
+#
+---
+<%-
+   my_new_port =  SecureRandom.random_number(8000..8999)
+-%>
+
+batch_connect:
+  template: "vnc"
+  min_port: <%= my_new_port %>
+  max_port: <%= my_new_port %>
+  conn_params:
+     - my_new_port
+  script_wrapper: |
+     export PATH="/opt/TurboVNC/bin:/usr/local/bin:$PATH"
+     export WEBSOCKIFY_CMD="/usr/bin/websockify"
+     %s
+
+script:
+   shell_path: null
+   queue_name: <%= bc_queue %>
+   job_environment:
+      LSF_DOCKER_ENTRYPOINT: "/bin/bash"
+      LSF_OOD_PORT: <%= my_new_port %>
+      LSF_DOCKER_PORTS: "<%= my_new_port %>:<%= my_new_port %>"
+      LSF_DOCKER_VOLUMES: "<%= mounts %> <%= ENV['HOME'] %>:<%= ENV['HOME'] %>"
+      LSF_DOCKER_NETWORK: "host"
+      LSF_DOCKER_IPC: "host"
+      LSB_SUB_ADDITIONAL: "docker(gcr.io/ris-registry-shared/ood-interactive-ubuntu:latest)"
+   native: 
+      - "-n"
+      - "<%= bc_num_slots %>"
+      - "-M"
+      - "<%= memory %>G"
+      - "-R"
+      - "'select[mem><%= memory %>G,port<%= my_new_port %>=1] rusage[mem=<%= memory %>G]'"
+      <%- if job_group.present? -%>
+      - "-g"
+      - "<%= job_group %>"
+      <%- end -%>
+      <%- if user_group.present? -%>
+      - "-G"
+      - "<%= user_group %>"
+      <%- end -%>
